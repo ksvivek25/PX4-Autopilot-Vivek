@@ -104,7 +104,7 @@ For example, on an 8 GB card with defaults, cleanup keeps at least `820 + 1024 =
 so ~6 GB is usable for logs and disk usage never exceeds 90% during writing.
 Small flash targets override `SDLOG_MAX_SIZE` to a smaller value to keep more logs within the available space.
 
-PX4 stores logs in directories named with one of two formats, depending on whether the system has valid time: date directories (such as `2024-01-15` or  `2024-01-16`) when it does, and session directories (`sess001`) when it doesn't.
+PX4 stores logs in directories named with one of two formats, depending on whether the system has valid time: date directories (such as `2024-01-15` or `2024-01-16`) when it does, and session directories (`sess001`) when it doesn't.
 The cleanup algorithm prioritises deleting logs from whichever format is not currently in use.
 This ensures that stale logs from a different time mode are cleaned up before current logs.
 
