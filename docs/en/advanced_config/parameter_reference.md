@@ -22591,7 +22591,7 @@ Height rate feed forward.
 
 | Reboot | minValue | maxValue | increment | default | unit | Read-Only |
 | ------ | -------- | -------- | --------- | ------- | ---- | --------- |
-| &nbsp; | 0.0      | 1.0      | 0.05      | 0.3     |      | &nbsp;    |
+| &nbsp; | 0.0      | 1.0      | 0.05      | 0.5     |      | &nbsp;    |
 
 ### FW_T_I_GAIN_PIT (`FLOAT`) {#FW_T_I_GAIN_PIT}
 
