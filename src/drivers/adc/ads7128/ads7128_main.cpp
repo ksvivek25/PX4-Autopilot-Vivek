@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2021 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2026 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,27 +30,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+#include <px4_platform_common/getopt.h>
+#include <px4_platform_common/module.h>
+#include "ads7128.h"
 
-#include "ActuatorEffectivenessRoverAckermann.hpp"
-
-using namespace matrix;
-
-bool
-ActuatorEffectivenessRoverAckermann::getEffectivenessMatrix(Configuration &configuration,
-		EffectivenessUpdateReason external_update)
+void ADS7128::print_usage()
 {
-	if (external_update == EffectivenessUpdateReason::NO_EXTERNAL_UPDATE) {
-		return false;
-	}
-
-	configuration.addActuator(ActuatorType::MOTORS, Vector3f{}, Vector3f{1.f, 0.f, 0.f});
-	_motors_mask = 1u << 0;
-	configuration.addActuator(ActuatorType::SERVOS, Vector3f{0.f, 0.f, 1.f}, Vector3f{});
-	return true;
+	PRINT_MODULE_USAGE_NAME("ADS7128", "driver");
+	PRINT_MODULE_USAGE_SUBCATEGORY("adc");
+	PRINT_MODULE_USAGE_COMMAND("start");
+	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
+	PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x10);
+	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 }
 
-void ActuatorEffectivenessRoverAckermann::updateSetpoint(const matrix::Vector<float, NUM_AXES> &control_sp,
-		int matrix_index, ActuatorVector &actuator_sp, const ActuatorVector &actuator_min, const ActuatorVector &actuator_max)
+void ADS7128::print_status()
 {
-	stopMaskedMotorsWithZeroThrust(_motors_mask, actuator_sp);
+	I2CSPIDriverBase::print_status();
+	perf_print_counter(_cycle_perf);
+	perf_print_counter(_comms_errors);
+}
+
+extern "C" int ads7128_main(int argc, char *argv[])
+{
+	using ThisDriver = ADS7128;
+	BusCLIArguments cli{true, false};
+
+	cli.default_i2c_frequency = 400000;
+	cli.i2c_address = 0x10;
+	const char *name = MODULE_NAME;
+	const char *verb = cli.parseDefaultArguments(argc, argv);
+
+	if (!verb) {
+		ThisDriver::print_usage();
+		return -1;
+	}
+
+	BusInstanceIterator iterator(name, cli, DRV_ADC_DEVTYPE_ADS7128);
+
+	if (!strcmp(verb, "start")) {
+		return ThisDriver::module_start(cli, iterator);
+	}
+
+	if (!strcmp(verb, "stop")) {
+		return ThisDriver::module_stop(iterator);
+	}
+
+	if (!strcmp(verb, "status")) {
+		return ThisDriver::module_status(iterator);
+	}
+
+	ThisDriver::print_usage();
+	return -1;
 }

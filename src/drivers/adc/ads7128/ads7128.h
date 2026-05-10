@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2021 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2026 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,23 +30,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-
 #pragma once
 
-#include "control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp"
+#include <stdint.h>
+#include <drivers/drv_hrt.h>
+#include <px4_platform_common/i2c_spi_buses.h>
+#include <lib/drivers/device/i2c.h>
+#include <uORB/topics/adc_report.h>
+#include <uORB/PublicationMulti.hpp>
+#include <px4_platform_common/module_params.h>
 
-class ActuatorEffectivenessRoverAckermann : public ActuatorEffectiveness
+using namespace time_literals;
+
+class ADS7128 : public device::I2C, public I2CSPIDriver<ADS7128>, public ModuleParams
 {
 public:
-	ActuatorEffectivenessRoverAckermann() = default;
-	virtual ~ActuatorEffectivenessRoverAckermann() = default;
+	ADS7128(const I2CSPIDriverConfig &config);
+	~ADS7128() override;
 
-	bool getEffectivenessMatrix(Configuration &configuration, EffectivenessUpdateReason external_update) override;
+	static void print_usage();
+	int init() override;
+	void RunImpl();
+	int probe() override;
+	void print_status() override;
 
-	void updateSetpoint(const matrix::Vector<float, NUM_AXES> &control_sp, int matrix_index, ActuatorVector &actuator_sp,
-			    const ActuatorVector &actuator_min, const ActuatorVector &actuator_max) override;
-
-	const char *name() const override { return "Rover (Ackermann)"; }
 private:
-	ActuatorBitmask _motors_mask{};
+	static const hrt_abstime SAMPLE_INTERVAL{10_ms};
+	static constexpr int NUM_CHANNELS = 8;
+
+	perf_counter_t _cycle_perf;
+	perf_counter_t _comms_errors;
+
+	uORB::PublicationMulti<adc_report_s> _adc_report_pub{ORB_ID(adc_report)};
+	adc_report_s _adc_report{};
+
+	DEFINE_PARAMETERS(
+		(ParamFloat<px4::params::ADC_ADS7128_REFV>) _adc_ads7128_refv
+	)
+
+	int init_reset();
+	int poll_reset();
+	int configure();
+	int init_calibrate();
+	int poll_calibrate();
+	int adc_get();
+	void exit_and_cleanup() override;
+
+	enum class STATE : uint8_t {
+		RESET,
+		CONFIGURE,
+		CALIBRATE,
+		WORK
+	};
+	STATE _state{STATE::RESET};
+
+	int consecutive_fails{0};
 };

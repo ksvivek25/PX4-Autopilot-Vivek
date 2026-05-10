@@ -386,6 +386,7 @@
 
   - [Периферія](peripherals/index.md)
     - [ADSB/FLARM/UTM (уникнення трафіку)](peripherals/adsb_flarm.md)
+    - [On-Screen Display (OSD)](peripherals/osd.md)
     - [Парашут](peripherals/parachute.md)
     - [Remote ID](peripherals/remote_id.md)
 
@@ -424,6 +425,8 @@
   - [PX4 Ethernet Setup](advanced_config/ethernet_setup.md)
 
   - [Стандартна конфігурація](config/index.md)
+
+  - [OEM Configuration](advanced_config/oem.md)
 
   - [Розширені налаштування](advanced_config/index.md)
     - [Using PX4's Navigation Filter (EKF2)](advanced_config/tuning_the_ecl_ekf.md)
@@ -492,6 +495,7 @@
       - [Gazebo Models Repository](sim_gazebo_gz/gazebo_models.md)
       - [Багатотранспортний Sim](sim_gazebo_gz/multi_vehicle_simulation.md)
     - [SIH Simulation](sim_sih/index.md)
+      - [Hawkeye Visualizer](sim_hawkeye/index.md)
     - [Симуляція Gazebo Classic](sim_gazebo_classic/index.md)
       - [Vehicles](sim_gazebo_classic/vehicles.md)
       - [Worlds](sim_gazebo_classic/worlds.md)
